@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Stego Studio</title>
+  <style>
+    :root{
+      --bg:#0b1220; --card:rgba(255,255,255,.08); --text:rgba(255,255,255,.92);
+      --muted:rgba(255,255,255,.65); --border:rgba(255,255,255,.14);
+      --accent:#6ee7ff; --accent2:#a78bfa; --danger:#ff6b6b; --ok:#64ff9a;
+      --shadow: 0 20px 60px rgba(0,0,0,.35); --radius: 18px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; min-height:100vh; color:var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      background:
+        radial-gradient(1000px 600px at 20% 10%, rgba(110,231,255,.22), transparent 60%),
+        radial-gradient(900px 500px at 80% 20%, rgba(167,139,250,.20), transparent 60%),
+        radial-gradient(900px 700px at 50% 90%, rgba(100,255,154,.10), transparent 65%),
+        var(--bg);
+    }
+    .container{max-width:1200px;margin:0 auto;padding:24px}
+    .topbar{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+      padding:14px 18px;border:1px solid var(--border);border-radius:999px;
+      background:linear-gradient(180deg, rgba(255,255,255,.09), rgba(255,255,255,.05));
+      box-shadow: var(--shadow);
+      position:sticky;top:16px;backdrop-filter: blur(10px);
+      z-index:10;
+    }
+    .brand{display:flex;gap:12px;align-items:center}
+    .logo{
+      width:34px;height:34px;border-radius:12px;
+      background: radial-gradient(circle at 30% 30%, var(--accent), transparent 60%),
+                  radial-gradient(circle at 70% 70%, var(--accent2), transparent 60%),
+                  rgba(255,255,255,.06);
+      border:1px solid var(--border);
+    }
+    .brand h1{margin:0;font-size:16px;letter-spacing:.3px}
+    .brand p{margin:0;font-size:12px;color:var(--muted)}
+    nav{display:flex;gap:8px;flex-wrap:wrap}
+    .tab{
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.06);
+      color:var(--text);
+      padding:10px 12px;border-radius:999px;
+      cursor:pointer;font-weight:700;font-size:13px;
+      transition: transform .12s ease, background .12s ease;
+      white-space:nowrap;
+    }
+    .tab:hover{transform: translateY(-1px); background:rgba(255,255,255,.10)}
+    .tab.active{
+      background: linear-gradient(90deg, rgba(110,231,255,.22), rgba(167,139,250,.22));
+      border-color: rgba(255,255,255,.22);
+    }
+    .hero{margin:26px 0 14px;display:flex;justify-content:space-between;gap:16px;align-items:flex-end;flex-wrap:wrap;}
+    .hero h2{margin:0;font-size:28px}
+    .hero .hint{color:var(--muted);max-width:760px;line-height:1.5;margin-top:6px}
+    .badge{font-size:12px;padding:6px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.16);background: rgba(255,255,255,.06);color: var(--muted);}
+    .grid{display:grid;grid-template-columns: 1.2fr .8fr; gap:16px}
+    @media (max-width: 900px){ .grid{grid-template-columns:1fr} }
+    .card{
+      background:linear-gradient(180deg, rgba(255,255,255,.09), rgba(255,255,255,.05));
+      border:1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .card .head{padding:18px 18px 12px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+    .title{display:flex;flex-direction:column;gap:4px}
+    .title h3{margin:0;font-size:16px}
+    .title span{color:var(--muted);font-size:12px}
+    .card .body{padding:18px}
+    label{display:block;font-size:12px;color:var(--muted);margin:12px 0 8px}
+    input[type="file"], input[type="password"], textarea{
+      width:100%;border:1px solid rgba(255,255,255,.14);background:rgba(0,0,0,.18);
+      color:var(--text);padding:12px 12px;border-radius: 14px;outline:none;
+    }
+    textarea{min-height:140px;resize:vertical}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    @media (max-width: 650px){ .row{grid-template-columns:1fr} }
+    .btn{
+      width:100%;border:1px solid rgba(255,255,255,.18);
+      padding:12px 14px;border-radius: 14px;
+      font-weight:800;letter-spacing:.2px;
+      background: linear-gradient(90deg, rgba(110,231,255,.22), rgba(167,139,250,.22));
+      color:var(--text);cursor:pointer;
+      transition: transform .12s ease, filter .12s ease;
+    }
+    .btn:hover{transform: translateY(-1px); filter: brightness(1.05)}
+    .panel{
+      padding:14px;border-radius: 14px;border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.04);color: var(--muted);
+      line-height:1.5;font-size:13px;white-space: pre-wrap;
+    }
+    .status.ok{color:var(--ok)}
+    .status.err{color:var(--danger)}
+    .small{font-size:12px;color:var(--muted)}
+    .hide{display:none}
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="topbar">
+    <div class="brand">
+      <div class="logo"></div>
+      <div>
+        <h1>Stego Studio</h1>
+        <p>Image • Audio • Video (local)</p>
+      </div>
+    </div>
+    <nav>
+      <button class="tab active" data-page="img-enc">Image Encode</button>
+      <button class="tab" data-page="img-dec">Image Decode</button>
+      <button class="tab" data-page="aud-enc">Audio Encode</button>
+      <button class="tab" data-page="aud-dec">Audio Decode</button>
+      <button class="tab" data-page="vid-enc">Video Encode</button>
+      <button class="tab" data-page="vid-dec">Video Decode</button>
+    </nav>
+  </div>
+
+  <div class="hero">
+    <div>
+      <h2 id="pageTitle">Image Encode</h2>
+      <div class="hint" id="pageHint">Hide text in an image and download the embedded output.</div>
+    </div>
+    <div class="badge" id="badge">PNG/JPG → embedded.png</div>
+  </div>
+
+  <!-- IMAGE ENCODE -->
+  <section id="page-img-enc">
+    <div class="grid">
+      <div class="card">
+        <div class="head"><div class="title"><h3>Encode (Image)</h3><span>Uses your ./stego binary</span></div></div>
+        <div class="body">
+          <form id="imgEncodeForm">
+            <label>Input image</label>
+            <input type="file" name="image" accept="image/*" required />
+            <label>Secret message</label>
+            <textarea name="message" required></textarea>
+            <div class="row">
+              <div>
+                <label>Password (optional)</label>
+                <input type="password" name="password" />
+              </div>
+              <div>
+                <label>&nbsp;</label>
+                <button class="btn" type="submit">Generate embedded image</button>
+              </div>
+            </div>
+          </form>
+          <div class="small" style="margin-top:10px">Tip: bigger images store longer messages.</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="head"><div class="title"><h3>Status</h3><span>Download</span></div></div>
+        <div class="body"><div id="imgEncStatus" class="panel">Waiting…</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- IMAGE DECODE -->
+  <section id="page-img-dec" class="hide">
+    <div class="grid">
+      <div class="card">
+        <div class="head"><div class="title"><h3>Decode (Image)</h3><span>Uses your ./stego binary</span></div></div>
+        <div class="body">
+          <form id="imgDecodeForm">
+            <label>Embedded image</label>
+            <input type="file" name="image" accept="image/*" required />
+            <div class="row">
+              <div>
+                <label>Password</label>
+                <input type="password" name="password" />
+              </div>
+              <div>
+                <label>&nbsp;</label>
+                <button class="btn" type="submit">Decode</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+      <div class="card">
+        <div class="head"><div class="title"><h3>Decoded Message</h3><span>Output</span></div></div>
+        <div class="body"><div id="imgDecOut" class="panel">Waiting…</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- AUDIO ENCODE -->
+  <section id="page-aud-enc" class="hide">
+    <div class="grid">
+      <div class="card">
+        <div class="head"><div class="title"><h3>Encode (Audio)</h3><span>WAV PCM recommended</span></div></div>
+        <div class="body">
+          <form id="audEncodeForm">
+            <label>Input WAV</label>
+            <input type="file" name="audio" accept=".wav,audio/wav" required />
+            <label>Secret message</label>
+            <textarea name="message" required></textarea>
+            <div class="row">
+              <div>
+                <label>Password (optional)</label>
+                <input type="password" name="password" />
+              </div>
+              <div>
+                <label>&nbsp;</label>
+                <button class="btn" type="submit">Generate embedded WAV</button>
+              </div>
+            </div>
+          </form>
+          <div class="small" style="margin-top:10px">If you use MP3, convert to WAV first.</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="head"><div class="title"><h3>Status</h3><span>Download</span></div></div>
+        <div class="body"><div id="audEncStatus" class="panel">Waiting…</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- AUDIO DECODE -->
+  <section id="page-aud-dec" class="hide">
+    <div class="grid">
+      <div class="card">
+        <div class="head"><div class="title"><h3>Decode (Audio)</h3><span>Extract hidden text from WAV</span></div></div>
+        <div class="body">
+          <form id="audDecodeForm">
+            <label>Embedded WAV</label>
+            <input type="file" name="audio" accept=".wav,audio/wav" required />
+            <div class="row">
+              <div>
+                <label>Password</label>
+                <input type="password" name="password" />
+              </div>
+              <div>
+                <label>&nbsp;</label>
+                <button class="btn" type="submit">Decode</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+      <div class="card">
+        <div class="head"><div class="title"><h3>Decoded Message</h3><span>Output</span></div></div>
+        <div class="body"><div id="audDecOut" class="panel">Waiting…</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- VIDEO ENCODE -->
+  <section id="page-vid-enc" class="hide">
+    <div class="grid">
+      <div class="card">
+        <div class="head"><div class="title"><h3>Encode (Video)</h3><span>Embeds into first frame (lossy codecs may break it)</span></div></div>
+        <div class="body">
+          <form id="vidEncodeForm">
+            <label>Input video</label>
+            <input type="file" name="video" accept="video/*" required />
+            <label>Secret message</label>
+            <textarea name="message" required></textarea>
+            <div class="row">
+              <div>
+                <label>Password (optional)</label>
+                <input type="password" name="password" />
+              </div>
+              <div>
+                <label>&nbsp;</label>
+                <button class="btn" type="submit">Generate embedded video</button>
+              </div>
+            </div>
+          </form>
+          <div class="small" style="margin-top:10px">Output is AVI (MJPEG) for stability.</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="head"><div class="title"><h3>Status</h3><span>Download</span></div></div>
+        <div class="body"><div id="vidEncStatus" class="panel">Waiting…</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- VIDEO DECODE -->
+  <section id="page-vid-dec" class="hide">
+    <div class="grid">
+      <div class="card">
+        <div class="head"><div class="title"><h3>Decode (Video)</h3><span>Reads hidden text from first frame</span></div></div>
+        <div class="body">
+          <form id="vidDecodeForm">
+            <label>Embedded video</label>
+            <input type="file" name="video" accept="video/*" required />
+            <div class="row">
+              <div>
+                <label>Password</label>
+                <input type="password" name="password" />
+              </div>
+              <div>
+                <label>&nbsp;</label>
+                <button class="btn" type="submit">Decode</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+      <div class="card">
+        <div class="head"><div class="title"><h3>Decoded Message</h3><span>Output</span></div></div>
+        <div class="body"><div id="vidDecOut" class="panel">Waiting…</div></div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+  const tabs = [...document.querySelectorAll(".tab")];
+  const pages = {};
+  document.querySelectorAll("section[id^='page-']").forEach(s => pages[s.id.replace("page-","")] = s);
+
+  const pageTitle = document.getElementById("pageTitle");
+  const pageHint  = document.getElementById("pageHint");
+  const badge     = document.getElementById("badge");
+
+  function meta(name){
+    const m = {
+      "img-enc": ["Image Encode","Hide text in an image and download the embedded output.","PNG/JPG → embedded.png"],
+      "img-dec": ["Image Decode","Upload an embedded image + password to reveal the secret message.","embedded.png → message"],
+      "aud-enc": ["Audio Encode","Hide text inside a WAV file using LSB.","WAV → embedded.wav"],
+      "aud-dec": ["Audio Decode","Extract hidden text from embedded WAV.","embedded.wav → message"],
+      "vid-enc": ["Video Encode","Hide text inside the first video frame (AVI MJPEG output).","VIDEO → embedded.avi"],
+      "vid-dec": ["Video Decode","Extract hidden text from the first frame of embedded video.","embedded.avi → message"],
+    };
+    return m[name];
+  }
+
+  function showPage(name){
+    tabs.forEach(t => t.classList.toggle("active", t.dataset.page === name));
+    Object.entries(pages).forEach(([k, el]) => el.classList.toggle("hide", k !== name));
+    const [t,h,b] = meta(name);
+    pageTitle.textContent = t; pageHint.textContent = h; badge.textContent = b;
+  }
+  tabs.forEach(t => t.addEventListener("click", () => showPage(t.dataset.page)));
+
+  // Helpers
+  async function postDownload(url, formEl, filename, statusEl){
+    statusEl.textContent = "Working…";
+    statusEl.className = "panel";
+    const res = await fetch(url, { method:"POST", body: new FormData(formEl) });
+    if(!res.ok){
+      const err = await res.json().catch(()=>({}));
+      statusEl.textContent = "Error: " + (err.details || err.error || "Failed");
+      statusEl.classList.add("status","err");
+      return;
+    }
+    const blob = await res.blob();
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    a.click();
+    statusEl.textContent = "Done ✅ Download started: " + filename;
+    statusEl.classList.add("status","ok");
+  }
+  async function postJson(url, formEl, outEl){
+    outEl.textContent = "Working…";
+    outEl.className = "panel";
+    const res = await fetch(url, { method:"POST", body: new FormData(formEl) });
+    const data = await res.json().catch(()=>({}));
+    if(!res.ok){
+      outEl.textContent = "Error: " + (data.details || data.error || "Failed");
+      outEl.classList.add("status","err");
+      return;
+    }
+    outEl.textContent = data.message || "";
+    outEl.classList.add("status","ok");
+  }
+
+  // Image
+  document.getElementById("imgEncodeForm").addEventListener("submit", e => { e.preventDefault(); postDownload("/encode", e.target, "embedded.png", document.getElementById("imgEncStatus")); });
+  document.getElementById("imgDecodeForm").addEventListener("submit", e => { e.preventDefault(); postJson("/decode", e.target, document.getElementById("imgDecOut")); });
+
+  // Audio
+  document.getElementById("audEncodeForm").addEventListener("submit", e => { e.preventDefault(); postDownload("/audio/encode", e.target, "embedded.wav", document.getElementById("audEncStatus")); });
+  document.getElementById("audDecodeForm").addEventListener("submit", e => { e.preventDefault(); postJson("/audio/decode", e.target, document.getElementById("audDecOut")); });
+
+  // Video
+  document.getElementById("vidEncodeForm").addEventListener("submit", e => { e.preventDefault(); postDownload("/video/encode", e.target, "embedded.avi", document.getElementById("vidEncStatus")); });
+  document.getElementById("vidDecodeForm").addEventListener("submit", e => { e.preventDefault(); postJson("/video/decode", e.target, document.getElementById("vidDecOut")); });
+
+  showPage("img-enc");
+</script>
+</body>
+</html>
