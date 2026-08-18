@@ -163,10 +163,3 @@ curl -F "video=@embedded.avi" -F "password=optional" http://127.0.0.1:5000/video
 - The server is a single-file Flask app (`app.py`) and uses `templates/index.html` for the UI. Modify templates or routes to extend functionality.
 - Tests are not included; you can exercise endpoints via the UI or curl commands above.
 
-## Contributing
-
-- Contributions are welcome. Open an issue describing the change you'd like to make, then submit a pull request.
-
-## License
-
-No license is specified. Add a `LICENSE` file if you wish to choose a license for this project.
